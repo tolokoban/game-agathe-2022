@@ -3,8 +3,9 @@ import { fetchAssets } from "./assets"
 import { startApplication } from "./main"
 
 const ASSETS = {
-    diamTexture: "assets/img/row-diam.png",
-    welcomeTexture: "assets/img/welcome.jpg",
+    floorTexture: "assets/img/floor.jpg",
+    wallTexture: "assets/img/wall.jpg",
+    spritesTexture: "assets/img/sprites.png",
 }
 
 async function start() {

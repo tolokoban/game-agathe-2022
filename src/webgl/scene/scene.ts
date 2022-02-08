@@ -13,7 +13,7 @@ export default class Scene {
         if (!gl) throw Error("Unable to create WebGL Context!")
 
         this.gl = gl
-        const observer = new ResizeObserver(entries => {
+        const observer = new ResizeObserver((entries) => {
             for (const entry of entries) {
                 if (entry.target === canvas) {
                     const width = canvas.clientWidth
@@ -30,21 +30,25 @@ export default class Scene {
     }
 
     public paint = (time: number) => {
-        for(const painter of this.painters) {
+        for (const painter of this.painters) {
             painter.paint(time)
         }
-        for(const painter of this.painters) {
+    }
+
+    public anim = (time: number) => {
+        for (const painter of this.painters) {
             painter.anim(time)
         }
     }
 
     public play() {
-        if(this.playing) return
+        if (this.playing) return
 
         this.playing = true
         const animation = (time: number) => {
             this.paint(time)
-            if(this.playing) window.requestAnimationFrame(animation)
+            this.anim(time)
+            if (this.playing) window.requestAnimationFrame(animation)
         }
         window.requestAnimationFrame(animation)
     }

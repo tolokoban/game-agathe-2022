@@ -1,0 +1,1 @@
+export { default, Sprite } from "./sprite-painter"

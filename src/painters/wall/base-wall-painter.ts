@@ -1,5 +1,5 @@
 /**
- * This file has been generatged automatically on 2022-02-08T12:30:22.297Z
+ * This file has been generatged automatically on 2022-02-07T21:16:55.795Z
  * Please extends this abstract class to have it work.
  */
 export default abstract class BasePainter {
@@ -133,21 +133,38 @@ function createShader(gl: WebGLRenderingContext, type: number, code: string) {
     return shader
 }
 
-const VERT = `/**/uniform float uniTime;
+const VERT = `/*
+
+*/
+
+uniform float uniTime;
 uniform float uniSpeed;
 uniform float uniShrink;
+// Screen width and height.
 uniform vec2 uniScreen;
+
 attribute vec2 attPos;
 attribute vec2 attUV;
+
 varying vec2 varUV;
-void main(){float w=uniScreen.x;
-float h=uniScreen.y;
-float scaleV=h/(w*uniShrink);
-varUV=vec2(attUV.x,attUV.y*scaleV+uniTime*uniSpeed);
-gl_Position=vec4(attPos.x,attPos.y,1.0,1.0);}`
+
+void main() {
+    float w = uniScreen.x;
+    float h = uniScreen.y;
+    float scaleV = h / (w * uniShrink);
+    varUV = attUV * vec2(scaleV, 1.0)
+        - vec2(uniTime * uniSpeed * 0.0000000001, 0.0);
+    gl_Position = vec4( attPos.x, attPos.y, 1.0, 1.0 );
+}
+`
 
 const FRAG = `precision mediump float;
+
 uniform sampler2D uniTexture;
 varying vec2 varUV;
-void main(){vec3 color=texture2D(uniTexture,varUV).rgb;
-gl_FragColor=vec4(color,1.0);}`
+
+void main() {
+  vec3 color = texture2D( uniTexture, varUV ).rgb;
+  gl_FragColor = vec4( color, 1.0 );
+}
+`

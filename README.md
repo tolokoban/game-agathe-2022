@@ -1,3 +1,4 @@
-# template-game
+# Agathe 2022
 
-Template for WebGL game
+Silly cat and mice game.
+
