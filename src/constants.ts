@@ -18,6 +18,6 @@ export const MARGIN = 0.15
  * in pixels.
  * The SPEED is W pixels per msec.
  */
-export const SPEED = 0.0003
+export const SPEED = 0.0004
 
-export const MOUSE_COUNT = 5
+export const MOUSE_COUNT = 9

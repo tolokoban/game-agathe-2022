@@ -19,12 +19,13 @@ void main() {
     float w = uniScreen.x * uniShrink;
     float h = uniScreen.y;
     gl_PointSize = attSize * w;
+    float ratio = w / h;
     gl_Position = vec4( 
         attPos.x * uniShrink, 
-        0.8 + attPos.y * h / w, 1.0, 1.0 
+        attPos.y * 2.0 * ratio + 1.0 - ratio * 0.5, 
+        1.0, 1.0 
     );
-}
-`
+}`
     private static FRAG = `precision mediump float;
 
 // Atlas of 8x8 sprites.
@@ -37,8 +38,7 @@ varying vec2 varUV;
 
 void main() {
   gl_FragColor = texture2D( uniTexture, varUV + TILE * gl_PointCoord );
-}
-`
+}`
     private static ATTRIBS_COUNT = 5
     protected readonly prg: WebGLProgram
     protected readonly vertBuff: WebGLBuffer

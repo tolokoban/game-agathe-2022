@@ -1,4 +1,3 @@
-body,
 html {
     position: absolute;
     width: 100%;
@@ -8,6 +7,26 @@ html {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background-color: #000;
+}
+
+body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+@media (orientation: landscape) {
+    body {
+        left: 50%;
+        margin-left: calc(-60vh / 2);
+        width: 60vh;
+    }
 }
 
 body > canvas#canvas {
@@ -33,7 +52,7 @@ body > canvas#canvas {
     height: 1rem;
     margin-top: -0.5rem;
     width: calc(100% - 2rem);
-    box-shadow: 0 0 1rem .5rem #0007;
+    box-shadow: 0 0 1rem 0.5rem #0007;
     overflow: visible;
 }
 
@@ -126,5 +145,5 @@ progress[value]::-moz-progress-bar {
         );
     background-size: 100% 100%, 1.5rem 1rem, 100% 100%;
     border-radius: 0.5rem;
-    box-shadow: 0 0 .5rem .5rem #ff8e;
+    box-shadow: 0 0 0.5rem 0.5rem #ff8e;
 }

@@ -30,9 +30,9 @@ export default async (): Promise<Config.InitialOptions> => {
         verbose: false
     }
 
-    FS.writeFileSync(
-        Path.join(__dirname, "jest.config.json"),
-        JSON.stringify(cfg, null, "    ")
-    )
+    // FS.writeFileSync(
+    //     Path.join(__dirname, "jest.config.json"),
+    //     JSON.stringify(cfg, null, "    ")
+    // )
     return cfg
 }
