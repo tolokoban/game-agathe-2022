@@ -1,5 +1,6 @@
 import { COLUMNS } from "./../constants"
 import { Sprite } from "../painters/sprite"
+import { clamp } from "../tools"
 
 const SPEED = 0.008
 
@@ -8,7 +9,7 @@ export default class Cat implements Sprite {
     row: number = 0
     x: number = 0
     y: number = 0
-    size: number = 2 / COLUMNS
+    size: number = 1 / COLUMNS
 
     private target = 0
 
@@ -28,8 +29,3 @@ export default class Cat implements Sprite {
     }
 }
 
-function clamp(v: number) {
-    if (v < 0) return 0
-    if (v >= 1) return 1 - 1e-6
-    return v
-}

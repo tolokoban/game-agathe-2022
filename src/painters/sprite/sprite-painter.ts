@@ -65,6 +65,6 @@ export default class SpritePainter extends BaseSpritePainter {
                 sprite.row * ATLAS_SIDE
             )
         }
-        this.pushData(data)
+        this.pushDataArray(data)
     }
 }

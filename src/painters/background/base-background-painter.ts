@@ -1,8 +1,43 @@
 /**
- * This file has been generatged automatically on 2022-02-08T12:30:22.297Z
+ * This file has been generatged automatically on 2022-02-11T09:38:22.062Z
  * Please extends this abstract class to have it work.
  */
 export default abstract class BasePainter {
+    private static VERT = `// Time in msec
+uniform float uniTime;
+// Corridors width per msec
+uniform float uniSpeed;
+// Corridor width / screen width
+uniform float uniShrink;
+// Screen width and height
+uniform vec2 uniScreen;
+
+// The real position of the corridor
+attribute vec2 attPos;
+// (0,0), (1,0), (0,1), (1,1)
+attribute vec2 attUV;
+
+varying vec2 varUV;
+
+void main() {
+    float w = uniScreen.x * uniShrink;
+    float h = uniScreen.y;
+    varUV = attUV * vec2(1.0, h / w);
+    varUV += vec2(0, uniTime * uniSpeed);
+    gl_Position = vec4( attPos.x, attPos.y, 1.0, 1.0 );
+}
+`
+    private static FRAG = `precision mediump float;
+
+uniform sampler2D uniTexture;
+varying vec2 varUV;
+
+void main() {
+  vec3 color = texture2D( uniTexture, varUV ).rgb;
+  gl_FragColor = vec4( color, 1.0 );
+}
+`
+    private static ATTRIBS_COUNT = 4
     protected readonly prg: WebGLProgram
     protected readonly vertBuff: WebGLBuffer
 
@@ -13,8 +48,16 @@ export default abstract class BasePainter {
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create a WebGL Program!")
 
-        const vertShader = createShader(gl, gl.VERTEX_SHADER, VERT)
-        const fragShader = createShader(gl, gl.FRAGMENT_SHADER, FRAG)
+        const vertShader = BasePainter.createShader(
+            gl,
+            gl.VERTEX_SHADER,
+            BasePainter.VERT
+        )
+        const fragShader = BasePainter.createShader(
+            gl,
+            gl.FRAGMENT_SHADER,
+            BasePainter.FRAG
+        )
         gl.attachShader(prg, vertShader)
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
@@ -41,17 +84,51 @@ export default abstract class BasePainter {
         attUV_X: number,
         attUV_Y: number
     ) {
-        let index = vertexIndex * 4
+        let index = vertexIndex * BasePainter.ATTRIBS_COUNT
         ;(data[index++] = attPos_X),
             (data[index++] = attPos_Y),
             (data[index++] = attUV_X),
             (data[index++] = attUV_Y)
     }
 
-    public pushData(data: Float32Array) {
+    public static swapData(data: Float32Array, indexA: number, indexB: number) {
+        let ptrA = indexA * BasePainter.ATTRIBS_COUNT
+        let ptrB = indexB * BasePainter.ATTRIBS_COUNT
+        let tmp: number = 0
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+    }
+
+    public pushDataArray(data: Float32Array) {
         const { gl, vertBuff } = this
         gl.bindBuffer(gl.ARRAY_BUFFER, vertBuff)
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+    }
+
+    /**
+     * @param start First vertex index to push
+     * @param end First vertex index to NOT push.
+     */
+    public pushDataSubArray(data: Float32Array, start: number, end: number) {
+        const { gl, vertBuff } = this
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuff)
+        const N = BasePainter.ATTRIBS_COUNT
+        const subData = data.subarray(start * N, end * N)
+        gl.bufferSubData(
+            gl.ARRAY_BUFFER,
+            start * Float32Array.BYTES_PER_ELEMENT * N,
+            subData
+        )
     }
 
     public $uniShrink(value: number) {
@@ -90,7 +167,7 @@ export default abstract class BasePainter {
         const { gl, prg } = this
         gl.useProgram(prg)
         const BPE = Float32Array.BYTES_PER_ELEMENT
-        const stride = 4 * BPE
+        const stride = BasePainter.ATTRIBS_COUNT * BPE
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuff)
         // attPos
         gl.enableVertexAttribArray(0)
@@ -111,43 +188,28 @@ export default abstract class BasePainter {
     protected abstract actualPaint(time: number): void
 
     protected abstract actualDestroy(): void
-}
 
-function createShader(gl: WebGLRenderingContext, type: number, code: string) {
-    const shader = gl.createShader(type)
-    if (!shader) throw Error("Unable to create WebGL Shader!")
+    private static createShader(
+        gl: WebGLRenderingContext,
+        type: number,
+        code: string
+    ) {
+        const shader = gl.createShader(type)
+        if (!shader) throw Error("Unable to create WebGL Shader!")
 
-    gl.shaderSource(shader, code)
-    gl.compileShader(shader)
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.log(code)
-        console.error(
-            "An error occurred compiling the shader: ",
-            gl.getShaderInfoLog(shader)
-        )
-        throw Error(
-            gl.getShaderInfoLog(shader) ??
-                "Unknow error while compiling the shader!"
-        )
+        gl.shaderSource(shader, code)
+        gl.compileShader(shader)
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log(code)
+            console.error(
+                "An error occurred compiling the shader: ",
+                gl.getShaderInfoLog(shader)
+            )
+            throw Error(
+                gl.getShaderInfoLog(shader) ??
+                    "Unknow error while compiling the shader!"
+            )
+        }
+        return shader
     }
-    return shader
 }
-
-const VERT = `/**/uniform float uniTime;
-uniform float uniSpeed;
-uniform float uniShrink;
-uniform vec2 uniScreen;
-attribute vec2 attPos;
-attribute vec2 attUV;
-varying vec2 varUV;
-void main(){float w=uniScreen.x;
-float h=uniScreen.y;
-float scaleV=h/(w*uniShrink);
-varUV=vec2(attUV.x,attUV.y*scaleV+uniTime*uniSpeed);
-gl_Position=vec4(attPos.x,attPos.y,1.0,1.0);}`
-
-const FRAG = `precision mediump float;
-uniform sampler2D uniTexture;
-varying vec2 varUV;
-void main(){vec3 color=texture2D(uniTexture,varUV).rgb;
-gl_FragColor=vec4(color,1.0);}`

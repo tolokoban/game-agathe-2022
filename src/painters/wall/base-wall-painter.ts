@@ -1,8 +1,43 @@
 /**
- * This file has been generatged automatically on 2022-02-07T21:16:55.795Z
+ * This file has been generatged automatically on 2022-02-11T10:23:56.647Z
  * Please extends this abstract class to have it work.
  */
 export default abstract class BasePainter {
+    private static VERT = `uniform float uniTime;
+// Texture tiles per msec
+uniform float uniSpeed;
+// uniShrink = 1.0 - MARGIN
+uniform float uniShrink;
+// Screen width and height
+uniform vec2 uniScreen;
+
+// x, y, W
+attribute vec3 attPos;
+attribute vec2 attUV;
+
+varying vec2 varUV;
+
+void main() {
+    float width = uniScreen.x * (1.0 - uniShrink);
+    float height = uniScreen.y;
+    varUV = attUV * vec2(height / width, 0.5);
+    varUV.x -= uniTime * uniSpeed;
+    float x = attPos.x;
+    float y = attPos.y;
+    float w = attPos.z;
+    gl_Position = vec4( x, y, 1.0, w );
+}`
+    private static FRAG = `precision mediump float;
+
+uniform sampler2D uniTexture;
+varying vec2 varUV;
+
+void main() {
+  vec3 color = texture2D( uniTexture, varUV ).rgb;
+  gl_FragColor = vec4( color, 1.0 );
+}
+`
+    private static ATTRIBS_COUNT = 5
     protected readonly prg: WebGLProgram
     protected readonly vertBuff: WebGLBuffer
 
@@ -13,8 +48,16 @@ export default abstract class BasePainter {
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create a WebGL Program!")
 
-        const vertShader = createShader(gl, gl.VERTEX_SHADER, VERT)
-        const fragShader = createShader(gl, gl.FRAGMENT_SHADER, FRAG)
+        const vertShader = BasePainter.createShader(
+            gl,
+            gl.VERTEX_SHADER,
+            BasePainter.VERT
+        )
+        const fragShader = BasePainter.createShader(
+            gl,
+            gl.FRAGMENT_SHADER,
+            BasePainter.FRAG
+        )
         gl.attachShader(prg, vertShader)
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
@@ -30,7 +73,7 @@ export default abstract class BasePainter {
     }
 
     public static createDataArray(vertexCount: number): Float32Array {
-        return new Float32Array(vertexCount * 4)
+        return new Float32Array(vertexCount * 5)
     }
 
     public static pokeData(
@@ -38,20 +81,59 @@ export default abstract class BasePainter {
         vertexIndex: number,
         attPos_X: number,
         attPos_Y: number,
+        attPos_Z: number,
         attUV_X: number,
         attUV_Y: number
     ) {
-        let index = vertexIndex * 4
+        let index = vertexIndex * BasePainter.ATTRIBS_COUNT
         ;(data[index++] = attPos_X),
             (data[index++] = attPos_Y),
+            (data[index++] = attPos_Z),
             (data[index++] = attUV_X),
             (data[index++] = attUV_Y)
     }
 
-    public pushData(data: Float32Array) {
+    public static swapData(data: Float32Array, indexA: number, indexB: number) {
+        let ptrA = indexA * BasePainter.ATTRIBS_COUNT
+        let ptrB = indexB * BasePainter.ATTRIBS_COUNT
+        let tmp: number = 0
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+        tmp = data[ptrA]
+        data[ptrA++] = data[ptrB]
+        data[ptrB++] = tmp
+    }
+
+    public pushDataArray(data: Float32Array) {
         const { gl, vertBuff } = this
         gl.bindBuffer(gl.ARRAY_BUFFER, vertBuff)
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+    }
+
+    /**
+     * @param start First vertex index to push
+     * @param end First vertex index to NOT push.
+     */
+    public pushDataSubArray(data: Float32Array, start: number, end: number) {
+        const { gl, vertBuff } = this
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuff)
+        const N = BasePainter.ATTRIBS_COUNT
+        const subData = data.subarray(start * N, end * N)
+        gl.bufferSubData(
+            gl.ARRAY_BUFFER,
+            start * Float32Array.BYTES_PER_ELEMENT * N,
+            subData
+        )
     }
 
     public $uniShrink(value: number) {
@@ -90,14 +172,14 @@ export default abstract class BasePainter {
         const { gl, prg } = this
         gl.useProgram(prg)
         const BPE = Float32Array.BYTES_PER_ELEMENT
-        const stride = 4 * BPE
+        const stride = BasePainter.ATTRIBS_COUNT * BPE
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuff)
         // attPos
         gl.enableVertexAttribArray(0)
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, stride, 0 * BPE)
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0 * BPE)
         // attUV
         gl.enableVertexAttribArray(1)
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, stride, 2 * BPE)
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, stride, 3 * BPE)
         this.actualPaint(time)
     }
 
@@ -111,60 +193,28 @@ export default abstract class BasePainter {
     protected abstract actualPaint(time: number): void
 
     protected abstract actualDestroy(): void
-}
 
-function createShader(gl: WebGLRenderingContext, type: number, code: string) {
-    const shader = gl.createShader(type)
-    if (!shader) throw Error("Unable to create WebGL Shader!")
+    private static createShader(
+        gl: WebGLRenderingContext,
+        type: number,
+        code: string
+    ) {
+        const shader = gl.createShader(type)
+        if (!shader) throw Error("Unable to create WebGL Shader!")
 
-    gl.shaderSource(shader, code)
-    gl.compileShader(shader)
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.log(code)
-        console.error(
-            "An error occurred compiling the shader: ",
-            gl.getShaderInfoLog(shader)
-        )
-        throw Error(
-            gl.getShaderInfoLog(shader) ??
-                "Unknow error while compiling the shader!"
-        )
+        gl.shaderSource(shader, code)
+        gl.compileShader(shader)
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log(code)
+            console.error(
+                "An error occurred compiling the shader: ",
+                gl.getShaderInfoLog(shader)
+            )
+            throw Error(
+                gl.getShaderInfoLog(shader) ??
+                    "Unknow error while compiling the shader!"
+            )
+        }
+        return shader
     }
-    return shader
 }
-
-const VERT = `/*
-
-*/
-
-uniform float uniTime;
-uniform float uniSpeed;
-uniform float uniShrink;
-// Screen width and height.
-uniform vec2 uniScreen;
-
-attribute vec2 attPos;
-attribute vec2 attUV;
-
-varying vec2 varUV;
-
-void main() {
-    float w = uniScreen.x;
-    float h = uniScreen.y;
-    float scaleV = h / (w * uniShrink);
-    varUV = attUV * vec2(scaleV, 1.0)
-        - vec2(uniTime * uniSpeed * 0.0000000001, 0.0);
-    gl_Position = vec4( attPos.x, attPos.y, 1.0, 1.0 );
-}
-`
-
-const FRAG = `precision mediump float;
-
-uniform sampler2D uniTexture;
-varying vec2 varUV;
-
-void main() {
-  vec3 color = texture2D( uniTexture, varUV ).rgb;
-  gl_FragColor = vec4( color, 1.0 );
-}
-`

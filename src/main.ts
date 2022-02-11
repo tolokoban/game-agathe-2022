@@ -12,7 +12,7 @@ export function startApplication(canvas: HTMLCanvasElement, assets: Assets) {
     scene.setPainters([
         new BackgroundPainter(scene.gl, assets.floorTexture),
         new WallPainter(scene.gl, assets.wallTexture),
-        runtime
+        runtime,
     ])
     scene.play()
 }

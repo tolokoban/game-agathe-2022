@@ -11,11 +11,13 @@ export const COLUMNS = 5
  * clipping space.
  * (In clipping space, the screen has a total width of 2.)
  */
-export const MARGIN = 0.1
+export const MARGIN = 0.15
 
 /**
  * Let W be the the width of the corridor (floor without the walls)
  * in pixels.
  * The SPEED is W pixels per msec.
  */
-export const SPEED = 0.0001
+export const SPEED = 0.0003
+
+export const MOUSE_COUNT = 5

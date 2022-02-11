@@ -2,11 +2,11 @@ import { MARGIN, SPEED } from "./../../constants"
 import BaseWallPainter from "./base-wall-painter"
 import { createTextureFromImageRepeat } from "../../webgl/texture"
 
-const X = 1 - MARGIN
-const SPEED_WALL = (SPEED * (2 * (1 - MARGIN))) / MARGIN
+const SHRINK = 1 - MARGIN
 
 export default class WallPainter extends BaseWallPainter {
     private readonly texture: WebGLTexture
+    private readonly speed
 
     constructor(
         gl: WebGLRenderingContext,
@@ -14,13 +14,37 @@ export default class WallPainter extends BaseWallPainter {
     ) {
         super(gl)
         this.texture = createTextureFromImageRepeat(gl, image)
-        const data = WallPainter.createDataArray(4)
-        const Y = 1.1
-        WallPainter.pokeData(data, 0, -1, +Y, 1, 0)
-        WallPainter.pokeData(data, 1, -X, +1, 1, 1)
-        WallPainter.pokeData(data, 2, -1, -Y, 0, 0)
-        WallPainter.pokeData(data, 3, -X, -1, 0, 1)
-        this.pushData(data)
+        const data = WallPainter.createDataArray(12)
+        const perspective = 1.2
+        const Wa = 1
+        const Wb = perspective
+        const Xa = 1
+        const Xb = SHRINK * perspective
+        const Ya = perspective
+        const Yb = Ya
+        const U0 = 0
+        const U1 = 1
+        const V0 = 0
+        const V1 = 1
+        let idx = 0
+        WallPainter.pokeData(data, idx++, -Xa, +Ya, Wa, U1, V0)
+        WallPainter.pokeData(data, idx++, -Xb, +Yb, Wb, U1, V1)
+        WallPainter.pokeData(data, idx++, -Xa, -Ya, Wa, U0, V0)
+        WallPainter.pokeData(data, idx++, -Xb, +Yb, Wb, U1, V1)
+        WallPainter.pokeData(data, idx++, -Xa, -Ya, Wa, U0, V0)
+        WallPainter.pokeData(data, idx++, -Xb, -Yb, Wb, U0, V1)
+        //------------------------------------------------------
+        WallPainter.pokeData(data, idx++, Xa, +Ya, Wa, U1, V0)
+        WallPainter.pokeData(data, idx++, Xb, +Yb, Wb, U1, V1)
+        WallPainter.pokeData(data, idx++, Xa, -Ya, Wa, U0, V0)
+        WallPainter.pokeData(data, idx++, Xb, +Yb, Wb, U1, V1)
+        WallPainter.pokeData(data, idx++, Xa, -Ya, Wa, U0, V0)
+        WallPainter.pokeData(data, idx++, Xb, -Yb, Wb, U0, V1)
+        this.pushDataArray(data)
+        for (let i = 0; i < 4; i++) {
+            console.log(data.subarray(i * 5, (i + 1) * 5))
+        }
+        this.speed = (SPEED * (1 - MARGIN)) / MARGIN
     }
 
     anim(time: number) {}
@@ -32,10 +56,10 @@ export default class WallPainter extends BaseWallPainter {
         gl.disable(gl.DEPTH_TEST)
         this.$uniTexture(this.texture)
         this.$uniScreen(width, height)
-        this.$uniShrink(2 * MARGIN)
-        this.$uniSpeed(SPEED_WALL)
+        this.$uniShrink(SHRINK)
+        this.$uniSpeed(this.speed)
         this.$uniTime(time)
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+        gl.drawArrays(gl.TRIANGLES, 0, 12)
     }
 
     protected actualDestroy(): void {
