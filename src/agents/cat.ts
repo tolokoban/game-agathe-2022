@@ -5,6 +5,7 @@ import { makeBounceAlpha } from "../alpha"
 
 const SPEED = 0.008
 const BASE_SIZE = 1.3 / COLUMNS
+const ANIM_DURATION = 200
 
 export default class Cat implements Sprite {
     col: number = 0
@@ -13,7 +14,7 @@ export default class Cat implements Sprite {
     y: number = 0
     size: number = BASE_SIZE
 
-    private readonly bounceAlpha = makeBounceAlpha(0.5, 200)
+    private readonly bounceAlpha = makeBounceAlpha(0.5, ANIM_DURATION)
     private time = 0
     private target = 0
     private effect?: (time: number) => void
@@ -58,7 +59,9 @@ export default class Cat implements Sprite {
     miam() {
         const t0 = this.time
         this.effect = (time: number) => {
-            this.size = BASE_SIZE * (1 + this.bounceAlpha(time - t0))
+            const alpha = this.bounceAlpha(time - t0)
+            this.size = BASE_SIZE * (1 + alpha)
+            this.col = alpha > 0 ? 1 : 0
         }
     }
 }

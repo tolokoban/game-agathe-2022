@@ -11,7 +11,7 @@ export interface Sprite {
     readonly size: number
 }
 
-const ATLAS_SIDE = 1 / 8
+const ATLAS_SIDE = 1 / 4
 const SHRINK = 1 - MARGIN
 
 

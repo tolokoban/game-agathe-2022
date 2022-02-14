@@ -41,9 +41,6 @@ export default class WallPainter extends BaseWallPainter {
         WallPainter.pokeData(data, idx++, Xa, -Ya, Wa, U0, V0)
         WallPainter.pokeData(data, idx++, Xb, -Yb, Wb, U0, V1)
         this.pushDataArray(data)
-        for (let i = 0; i < 4; i++) {
-            console.log(data.subarray(i * 5, (i + 1) * 5))
-        }
         this.speed = (SPEED * (1 - MARGIN)) / MARGIN
     }
 

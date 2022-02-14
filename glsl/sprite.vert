@@ -17,7 +17,7 @@ void main() {
     float ratio = w / h;
     gl_Position = vec4( 
         attPos.x * uniShrink, 
-        attPos.y * 2.0 * ratio + 1.0 - ratio * 0.5, 
+        attPos.y * 2.0 * ratio + 1.0 - ratio * 0.75, 
         1.0, 1.0 
     );
 }

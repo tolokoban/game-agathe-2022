@@ -18,6 +18,9 @@ export function startApplication(canvas: HTMLCanvasElement, assets: Assets) {
             failIfMajorPerformanceCaveat: true,
         })
         const runtime = new Runtime(time, scene.gl, assets.spritesTexture)
+        runtime.eventGameOver.add(({success})=> {
+            scene.stop()
+        })
         scene.setPainters([
             new BackgroundPainter(scene.gl, assets.floorTexture),
             new WallPainter(scene.gl, assets.wallTexture),

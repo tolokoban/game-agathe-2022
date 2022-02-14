@@ -22,7 +22,7 @@ void main() {
     float ratio = w / h;
     gl_Position = vec4( 
         attPos.x * uniShrink, 
-        attPos.y * 2.0 * ratio + 1.0 - ratio * 0.5, 
+        attPos.y * 2.0 * ratio + 1.0 - ratio * 0.75, 
         1.0, 1.0 
     );
 }`
@@ -32,7 +32,7 @@ void main() {
 uniform sampler2D uniTexture;
 
 // Size of a a side of a square tile in the sprites' atlas.
-const float TILE = 1.0 / 8.0;
+const float TILE = 1.0 / 4.0;
 
 varying vec2 varUV;
 

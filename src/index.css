@@ -1,4 +1,5 @@
 html {
+    font-size: 5vh;
     position: absolute;
     width: 100%;
     height: 100%;
@@ -8,6 +9,7 @@ html {
     padding: 0;
     overflow: hidden;
     background-color: #000;
+    font-family: sans-serif;
 }
 
 body {
@@ -19,6 +21,8 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    display: grid;
+    place-items: center;
 }
 
 @media (orientation: landscape) {
@@ -27,6 +31,54 @@ body {
         margin-left: calc(-60vh / 2);
         width: 60vh;
     }
+}
+
+#score {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0.25em;
+    border-radius: 0 0 0.5em 0;
+    background-color: #fffd;
+    color: #333;
+    text-align: center;
+    font-weight: bolder;
+    pointer-events: none;
+}
+
+#lives {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 0;
+    padding: 0.25em;
+    border-radius: 0 0 0 0.5em;
+    background-color: #fffd;
+    color: #333;
+    text-align: center;
+    font-weight: bolder;
+    pointer-events: none;
+}
+
+div.hint {
+    opacity: 0.5;
+    font-size: 50%;
+}
+
+#message-warning {
+    z-index: 1;
+    background: #0007;
+    color: #f80;
+    padding: 0 0.5em;
+    border-radius: 999vmax;
+    transition: opacity 0.2s;
+    opacity: 1;
+    pointer-events: none;
+}
+
+#message-warning.hide {
+    opacity: 0;
 }
 
 body > canvas#canvas {

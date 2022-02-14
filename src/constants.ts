@@ -21,3 +21,7 @@ export const MARGIN = 0.15
 export const SPEED = 0.0004
 
 export const MOUSE_COUNT = 9
+
+export const START_DELTA_TIME = 1000
+
+export const DECREASE_DELTAT_TIME = 5

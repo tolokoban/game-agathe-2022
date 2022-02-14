@@ -32,7 +32,6 @@ export default class Scene {
             canvas.setAttribute("width", `${width}`)
             canvas.setAttribute("height", `${height}`)
             gl.viewport(0, 0, width, height)
-            console.log("viewPort", width, height)
         }
 
         for (const painter of this.painters) {
