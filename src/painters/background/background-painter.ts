@@ -26,8 +26,8 @@ export default class BackgroundPainter extends BaseBackgroundPainter {
     protected actualPaint(time: number): void {
         const { gl } = this
         const { width, height } = gl.canvas
-        gl.disable(gl.BLEND)
-        gl.disable(gl.DEPTH_TEST)
+        // gl.disable(gl.BLEND)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
         this.$uniTexture(this.texture)
         this.$uniScreen(width, height)
         this.$uniShrink(SHRINK)

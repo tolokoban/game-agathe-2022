@@ -1,31 +1,58 @@
 import { Assets } from "./assets"
 import Scene from "./webgl/scene"
 import WallPainter from "./painters/wall"
+import SpritePainter from "./painters/sprite"
+import TestPainter from "./painters/test"
 import BackgroundPainter from "./painters/background"
 import { assertImage } from "./validator"
 import Runtime from "./runtime/runtime"
+import { waitForKeyOrMouse } from "./tools"
+import { hideWelcome, printHighscore, printLives } from "./ui"
 
-export function startApplication(canvas: HTMLCanvasElement, assets: Assets) {
+export async function startApplication(
+    canvas: HTMLCanvasElement,
+    assets: Assets
+) {
+    assertAssets(assets)
+    const scene = new Scene(canvas, {
+        alpha: false,
+        depth: false,
+        stencil: false,
+        antialias: false,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: false,
+        failIfMajorPerformanceCaveat: true,
+        desynchronized: false,
+    })
+    const floorPainter = new BackgroundPainter(scene.gl, assets.floorTexture)
+    const wallPainter = new WallPainter(scene.gl, assets.wallTexture)
+    scene.setPainters([
+        floorPainter,
+        wallPainter,
+        new SpritePainter(scene.gl, assets.spritesTexture, [
+            {
+                col: 0,
+                row: 0,
+                size: 0.4,
+                x: 0,
+                y: 0,
+            },
+        ]),
+    ])
+    scene.play()
+    printHighscore()
+    printLives(3)
+    await waitForKeyOrMouse()
+    hideWelcome()
+
     window.requestAnimationFrame((time) => {
-        assertAssets(assets)
-        const scene = new Scene(canvas, {
-            alpha: false,
-            depth: false,
-            stencil: false,
-            antialias: false,
-            premultipliedAlpha: false,
-            preserveDrawingBuffer: false,
-            failIfMajorPerformanceCaveat: true,
-        })
         const runtime = new Runtime(time, scene.gl, assets.spritesTexture)
-        runtime.eventGameOver.add(({success})=> {
+        runtime.eventGameOver.add(async ({ success }) => {
             scene.stop()
+            await waitForKeyOrMouse()
+            window.document.location.reload()
         })
-        scene.setPainters([
-            new BackgroundPainter(scene.gl, assets.floorTexture),
-            new WallPainter(scene.gl, assets.wallTexture),
-            runtime,
-        ])
+        scene.setPainters([floorPainter, wallPainter, runtime])
         scene.play()
     })
 }

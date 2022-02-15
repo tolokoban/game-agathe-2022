@@ -28,16 +28,38 @@ export default class Cat implements Sprite {
     }
 
     readonly onKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "ArrowRight") {
-            const column = this.getColumn()
-            if (column < COLUMNS - 1) {
-                this.target = col2x(column + 1)
-            }
-        } else if (event.key === "ArrowLeft") {
-            const column = this.getColumn()
-            if (column > 0) {
-                this.target = col2x(column - 1)
-            }
+        let column = -1
+        switch (event.key) {
+            case "ArrowUp":
+            case "ArrowDown":
+                column = 2
+                break
+            case "ArrowRight":
+                column = this.getColumn() + 1
+                if (event.ctrlKey) column = COLUMNS - 1
+                break
+            case "ArrowLeft":
+                column = this.getColumn() - 1
+                if (event.ctrlKey) column = 0
+                break
+            case "1":
+                column = 0
+                break
+            case "2":
+                column = 1
+                break
+            case "3":
+                column = 2
+                break
+            case "4":
+                column = 3
+                break
+            case "5":
+                column = 4
+                break
+        }
+        if (column < COLUMNS && column >= 0) {
+            this.target = col2x(Math.min(COLUMNS - 1, Math.max(0, column)))
         }
     }
 

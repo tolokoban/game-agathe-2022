@@ -16,7 +16,7 @@ void main() {
     float width = uniScreen.x * (1.0 - uniShrink);
     float height = uniScreen.y;
     varUV = attUV * vec2(height / width, 0.5);
-    varUV.x +=  0.00000001* uniTime * uniSpeed;
+    varUV.x -= uniTime * uniSpeed;
     float x = attPos.x;
     float y = attPos.y;
     float w = attPos.z;
