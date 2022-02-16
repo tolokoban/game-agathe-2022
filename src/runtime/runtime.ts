@@ -34,8 +34,8 @@ export default class Runtime implements Painter, Context {
             this.mice.push(new Mouse(this))
         }
         window.document.addEventListener("keydown", cat.onKeyDown, true)
-        gl.canvas.addEventListener("pointerdown", cat.onPointerMove)
-        gl.canvas.addEventListener("pointermove", cat.onPointerMove)
+        window.document.addEventListener("pointerdown", cat.onPointerEvent, true)
+        window.document.addEventListener("pointermove", cat.onPointerEvent, true)
         const spritePainter = new SpritePainter(gl, spritesTexture, [
             ...this.mice,
             cat,
@@ -111,8 +111,8 @@ export default class Runtime implements Painter, Context {
     }
 
     destroy(): void {
-        this.gl.canvas.addEventListener("pointerdown", this.cat.onPointerMove)
-        this.gl.canvas.addEventListener("pointermove", this.cat.onPointerMove)
+        window.document.addEventListener("pointerdown", this.cat.onPointerEvent, true)
+        window.document.addEventListener("pointermove", this.cat.onPointerEvent, true)
         window.document.removeEventListener("keydown", this.cat.onKeyDown, true)
     }
 }

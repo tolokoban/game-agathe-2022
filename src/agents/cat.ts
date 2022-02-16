@@ -19,7 +19,7 @@ export default class Cat implements Sprite {
     private target = 0
     private effect?: (time: number) => void
 
-    readonly onPointerMove = (event: PointerEvent) => {
+    readonly onPointerEvent = (event: PointerEvent) => {
         const element = event.target as HTMLElement
         const rect = element.getBoundingClientRect()
         const { left, width } = rect
